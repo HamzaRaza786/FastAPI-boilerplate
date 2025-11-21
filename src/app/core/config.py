@@ -187,6 +187,8 @@ class Settings(
 
     @model_validator(mode="after")
     def validate_environment_settings(self) -> Self:
+        "The validation should not modify any of the settings. It should provide"
+        "feedback to the user if any misconfiguration is detected."
         if self.ENVIRONMENT == EnvironmentOption.LOCAL:
             pass
         elif self.ENVIRONMENT == EnvironmentOption.STAGING:
