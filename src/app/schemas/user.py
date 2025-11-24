@@ -36,7 +36,9 @@ class UserCreate(UserBase):
 
 
 class UserCreateInternal(UserBase):
-    hashed_password: str
+    model_config = ConfigDict(extra="forbid")
+
+    hashed_password: str | None
 
 
 class UserUpdate(BaseModel):

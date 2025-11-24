@@ -1,5 +1,4 @@
 import logging
-import secrets
 from abc import ABC
 from typing import Any
 
@@ -18,8 +17,8 @@ from ...core.security import (
     create_refresh_token,
 )
 from ...crud.crud_users import crud_users
-from ...schemas.user import UserCreate, UserRead
-from .users import write_user
+from ...schemas.user import UserCreateInternal, UserRead
+from .users import write_user_internal
 
 router = APIRouter(tags=["login", "oauth"])
 logger = logging.getLogger(__name__)
@@ -86,13 +85,13 @@ class BaseOAuthProvider(ABC):
 
         db_user = await crud_users.get(db=db, email=oauth_user.email, is_deleted=False, schema_to_select=UserRead)
         if not db_user:
-            user_create = await self._get_user_details(oauth_user)
-            db_user = await write_user(request=request, user=user_create, db=db)
+            user = await self._get_user_details(oauth_user)
+            db_user = await write_user_internal(user=user, db=db)
 
         access_token = await self._create_and_set_token(response, db_user)
         return {"access_token": access_token, "token_type": "bearer"}
 
-    async def _get_user_details(self, oauth_user: OpenID) -> UserCreate:
+    async def _get_user_details(self, oauth_user: OpenID) -> UserCreateInternal:
         """Get user details from the OAuth provider response.
 
         The exact details exposed by the OpenID class can be found here:
@@ -103,14 +102,11 @@ class BaseOAuthProvider(ABC):
         username = oauth_user.email.split("@")[0]
         name = oauth_user.display_name or username
 
-        # Create a random password for OAuth users.
-        # It can still be changed if the user requests login with password.
-        random_password = secrets.token_urlsafe(32)
-        return UserCreate(
+        return UserCreateInternal(
             email=oauth_user.email,
             name=name,
-            password=random_password,
             username=username,
+            hashed_password=None,  # No password since OAuth is used
         )
 
 
