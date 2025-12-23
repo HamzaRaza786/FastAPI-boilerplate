@@ -18,7 +18,7 @@ from ...schemas.user import UserCreate, UserCreateInternal, UserRead, UserTierUp
 router = APIRouter(tags=["users"])
 
 
-if settings.ENABLE_PASSWORD_AUTH:  # If password auth is not enable there should be no way to create users via the API
+if settings.ENABLE_PASSWORD_AUTH:
 
     @router.post("/user", response_model=UserRead, status_code=201)
     async def write_user(

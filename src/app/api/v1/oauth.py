@@ -2,7 +2,7 @@ import logging
 from abc import ABC
 from typing import Any
 
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, RedirectResponse, Request, Response
 from fastapi_sso.sso.base import OpenID, SSOBase
 from fastapi_sso.sso.github import GithubSSO
 from fastapi_sso.sso.google import GoogleSSO
@@ -73,7 +73,7 @@ class BaseOAuthProvider(ABC):
         )
         return access_token
 
-    async def _login_handler(self):
+    async def _login_handler(self) -> RedirectResponse:
         async with self.sso:
             return await self.sso.get_login_redirect()
 
@@ -106,7 +106,7 @@ class BaseOAuthProvider(ABC):
             email=oauth_user.email,
             name=name,
             username=username,
-            hashed_password=None,  # No password since OAuth is used
+            hashed_password=None,
         )
 
 
@@ -127,7 +127,7 @@ class MicrosoftOAuthProvider(BaseOAuthProvider):
     }
 
 
-class GithubSSOProvider(BaseOAuthProvider):
+class GithubOAuthProvider(BaseOAuthProvider):
     sso_provider = GithubSSO
     provider_config = {
         "client_id": settings.GITHUB_CLIENT_ID,
@@ -137,4 +137,4 @@ class GithubSSOProvider(BaseOAuthProvider):
 
 GoogleOAuthProvider(router)
 MicrosoftOAuthProvider(router)
-GithubSSOProvider(router)
+GithubOAuthProvider(router)
