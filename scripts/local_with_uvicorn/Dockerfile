@@ -21,7 +21,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-editable
 
 # --------- Final Stage ---------
-FROM python:3.11-slim-bookworm
+FROM python:3.14-slim-bookworm
 
 # Create a non-root user for security
 RUN groupadd --gid 1000 app \
